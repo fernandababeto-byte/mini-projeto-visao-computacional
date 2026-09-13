@@ -49,6 +49,10 @@ Cada imagem gera `processed_images/<classe>/<nome>.png`: um PNG de **um canal, 2
 
 ## Decisões do pipeline
 
+![Comparação das etapas do pipeline em uma peça com defeito e uma peça sem defeito](docs/comparativo_pipeline.jpg)
+
+O comparativo acima foi gerado pelo próprio projeto com uma amostra de cada pasta; os rótulos servem somente para rastrear a origem, sem influenciar o processamento.
+
 | Etapa | Como foi implementada | Propósito |
 | --- | --- | --- |
 | 1. Leitura e padronização | Busca dinâmica em ambas as pastas; decodificação OpenCV; redimensionamento para 256 × 256 | Processar o lote sem caminhos individuais e padronizar o tamanho |
@@ -65,6 +69,8 @@ A limiarização Otsu **sozinha** não separa bem a peça de todos os fundos des
 
 Os testes verificam extração segura do ZIP, repetibilidade, saídas de ambas as classes, formato do PNG, presença de bordas internas, relato de imagem corrompida e proteção contra saída dentro da entrada. Rode-os com `python -m unittest discover -s tests -v`. O comparativo permite inspecionar visualmente a máscara e os contornos em exemplos reais. **Bordas realçadas não são uma previsão de defeito**: brilho, variações de material e marcas de fabricação também podem produzir bordas.
 
+A execução final verificada processou as 1.300 imagens sem falhas e os cinco testes automatizados passaram. Os números, verificações de formato e casos revisados estão em [`docs/relatorio_validacao.md`](docs/relatorio_validacao.md).
+
 O redimensionamento de 512 para 256 pixels pode perder microdefeitos; e a hipótese de contorno aproximadamente elíptico não serve necessariamente para outras peças ou ângulos. Uma evolução seria validar máscaras com anotações humanas, medir a preservação de defeitos conhecidos e ajustar os parâmetros em um conjunto separado de validação, antes de treinar qualquer classificador.
 
 ## Versionamento e apresentação
@@ -72,4 +78,3 @@ O redimensionamento de 512 para 256 pixels pode perder microdefeitos; e a hipót
 O histórico local usa `main` (versão consolidada), `development` (integração), `feature/leitura-lote` (extração), `feature/pre-processamento-base` (lote, cinza, blur e Otsu), `feature/morfologia-bordas` (máscara, morfologia, Canny e testes) e `docs/documentacao` (README e apresentação), com commits descritivos e merges. Apenas código e documentação entram nos commits.
 
 O roteiro para um vídeo de até cinco minutos está em [`docs/roteiro_video.md`](docs/roteiro_video.md). Para finalizar a avaliação, a pessoa autora deve gravar a demonstração com o rosto visível e boa iluminação, publicar o repositório e disponibilizar o README e o vídeo no Google Drive com acesso de leitor para qualquer pessoa com o link. Os links reais devem ser colocados na submissão do AVA antes de **14/09/2026 às 22h**. A conferência de cada critério está em [`docs/conferencia_entrega.md`](docs/conferencia_entrega.md).
-
