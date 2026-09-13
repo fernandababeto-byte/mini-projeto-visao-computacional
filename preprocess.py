@@ -6,6 +6,7 @@ import argparse
 import csv
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Mapping
 
 import cv2
 import numpy as np
@@ -23,6 +24,7 @@ class ProcessResult:
     mask_coverage: float
     edge_coverage: float
     segmentation: str
+    stages: Mapping[str, np.ndarray] | None = None
 
 
 def read_image(path: Path) -> np.ndarray | None:
@@ -53,8 +55,67 @@ def image_paths(input_dir: Path, limit_per_class: int = 0) -> list[tuple[str, Pa
     return files
 
 
-def process_image(bgr: np.ndarray, size: int = 256) -> ProcessResult:
-    """Convert colors, smooth and segment a single image with Otsu."""
+def isolate_object(bgr: np.ndarray, dark_regions: np.ndarray) -> tuple[np.ndarray, np.ndarray, str]:
+    """Find the casting's outside boundary despite variations in background.
+
+    GrabCut proposes foreground pixels. Opening/closing removes small artefacts;
+    an ellipse fitted to the largest contour's convex hull restores sectors of
+    shiny metal that have a similar intensity to the background. The ellipse is
+    appropriate to the nearly circular, front-facing parts in this dataset.
+    """
+    height, width = dark_regions.shape
+    margin = max(2, round(min(height, width) / 64))
+    labels = np.zeros((height, width), dtype=np.uint8)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+
+    try:
+        cv2.grabCut(
+            bgr, labels, (margin, margin, width - 2 * margin, height - 2 * margin),
+            np.zeros((1, 65), dtype=np.float64),
+            np.zeros((1, 65), dtype=np.float64),
+            2, cv2.GC_INIT_WITH_RECT,
+        )
+        candidate = np.where(
+            (labels == cv2.GC_FGD) | (labels == cv2.GC_PR_FGD), 255, 0
+        ).astype(np.uint8)
+
+        # Closing (dilation then erosion) joins gaps; opening (erosion then
+        # dilation) removes isolated pixels. The kernel is deliberately small.
+        candidate = cv2.dilate(candidate, kernel, iterations=1)
+        candidate = cv2.erode(candidate, kernel, iterations=1)
+        candidate = cv2.erode(candidate, kernel, iterations=1)
+        candidate = cv2.dilate(candidate, kernel, iterations=1)
+        contours, _ = cv2.findContours(candidate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if not contours:
+            raise ValueError("GrabCut não encontrou o objeto")
+        contour = max(contours, key=cv2.contourArea)
+        hull = cv2.convexHull(contour)
+        if len(hull) < 5 or cv2.contourArea(contour) < width * height * 0.12:
+            raise ValueError("Contorno externo insuficiente para ajustar a elipse")
+
+        center, axes, angle = cv2.fitEllipse(hull)
+        mask = np.zeros((height, width), dtype=np.uint8)
+        cv2.ellipse(mask, (center, axes, angle), 255, thickness=cv2.FILLED)
+        # A large fitted ellipse far outside the frame is unreliable.
+        if (
+            not 0.25 <= np.mean(mask > 0) <= 0.82
+            or abs(center[0] - width / 2) > width * 0.23
+            or abs(center[1] - height / 2) > height * 0.23
+        ):
+            raise ValueError("Elipse incompatível com a posição da peça")
+        return mask, candidate, "grabcut_elipse"
+
+    except (cv2.error, ValueError):
+        # The rare uncertain case remains visible in the CSV for manual review.
+        # A conservative central circle avoids silently outputting an empty PNG.
+        center = (width // 2, height // 2)
+        fallback = np.zeros((height, width), dtype=np.uint8)
+        cv2.circle(fallback, center, round(min(height, width) * 0.43), 255, -1)
+        return fallback, dark_regions, "fallback_circulo_verificar"
+
+
+def process_image(bgr: np.ndarray, size: int = 256, include_stages: bool = False) -> ProcessResult:
+    """Normalize, segment and accentuate casting structure without classifying it."""
     if bgr is None or bgr.ndim != 3 or bgr.shape[2] != 3:
         raise ValueError("Esperada uma imagem colorida BGR de 3 canais.")
     if size < 64:
@@ -67,8 +128,32 @@ def process_image(bgr: np.ndarray, size: int = 256) -> ProcessResult:
     threshold, binary = cv2.threshold(
         smooth, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
     )
-    image = cv2.bitwise_and(smooth, smooth, mask=binary)
-    return ProcessResult(image, threshold, float(np.mean(binary != 0)), 0.0, "otsu")
+    mask, candidate, segmentation = isolate_object(resized, binary)
+
+    # Otsu isolates the dark cavities and grooves; the contour model above
+    # isolates the outside of the metal part against variable background.
+    small = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    dark = cv2.morphologyEx(binary, cv2.MORPH_OPEN, small)
+    dark = cv2.bitwise_and(dark, mask)
+    threshold_edges = cv2.morphologyEx(dark, cv2.MORPH_GRADIENT, small)
+
+    canny = cv2.Canny(smooth, threshold1=40, threshold2=100)
+    interior = cv2.erode(mask, small, iterations=1)
+    edges = cv2.bitwise_and(cv2.bitwise_or(canny, threshold_edges), interior)
+
+    image = cv2.bitwise_and(smooth, smooth, mask=mask)
+    image[edges != 0] = 255
+    stages = None
+    if include_stages:
+        stages = {
+            "cinza": gray, "suavizada": smooth, "otsu": binary,
+            "grabcut": candidate, "mascara": mask, "bordas": edges,
+            "final": image,
+        }
+    return ProcessResult(
+        image, threshold, float(np.mean(mask != 0)),
+        float(np.mean(edges != 0)), segmentation, stages,
+    )
 
 
 def process_batch(
@@ -149,4 +234,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
