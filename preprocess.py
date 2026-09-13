@@ -98,7 +98,7 @@ def isolate_object(bgr: np.ndarray, dark_regions: np.ndarray) -> tuple[np.ndarra
         cv2.ellipse(mask, (center, axes, angle), 255, thickness=cv2.FILLED)
         # A large fitted ellipse far outside the frame is unreliable.
         if (
-            not 0.25 <= np.mean(mask > 0) <= 0.82
+            not 0.30 <= np.mean(mask > 0) <= 0.82
             or abs(center[0] - width / 2) > width * 0.23
             or abs(center[1] - height / 2) > height * 0.23
         ):

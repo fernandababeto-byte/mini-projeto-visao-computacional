@@ -43,6 +43,12 @@ class DatasetPreparationTests(unittest.TestCase):
 
 
 class PipelineTests(unittest.TestCase):
+    def test_uniform_image_uses_reviewable_fallback(self) -> None:
+        result = process_image(np.full((64, 64, 3), 127, dtype=np.uint8), size=64)
+        self.assertEqual(result.segmentation, "fallback_circulo_verificar")
+        self.assertGreater(result.mask_coverage, 0.50)
+        self.assertLess(result.mask_coverage, 0.65)
+
     def test_output_is_standardized_and_preserves_internal_edges(self) -> None:
         original = sample_casting()
         result = process_image(original, size=256, include_stages=True)
@@ -89,4 +95,3 @@ class PipelineTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
