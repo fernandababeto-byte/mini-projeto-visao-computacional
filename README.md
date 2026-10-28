@@ -2,6 +2,30 @@
 
 Mini-projeto avaliativo de Machine Learning e Visão Computacional, Módulo 2, Semana 07. O programa prepara imagens de peças metálicas para uma possível etapa futura de aprendizado de máquina. **Ele não classifica defeitos:** as pastas `def_front` e `ok_front` são preservadas apenas para organizar a saída e permitir avaliação visual.
 
+## Demonstração reproduzível sem baixar o dataset
+
+Após instalar as dependências descritas abaixo, execute:
+
+```bash
+python demo_comparativa.py --output reports/minha_demo --repeats 5
+python -m unittest discover -s tests -v
+```
+
+Use uma pasta de saída nova: a demonstração recusa sobrescrever uma execução anterior.
+Ela gera seis imagens **sintéticas**, suas máscaras de referência, um comparativo
+visual, CSV com métricas e tempos individuais, e JSON com ambiente, sementes e
+hashes. Pode levar alguns minutos, especialmente na configuração de 512 pixels.
+Não requer GPU, conta no Kaggle ou imagens de clientes.
+
+São comparados Otsu com maior contorno e o pipeline original em 128, 256 e 512
+pixels. A demonstração avalia a **silhueta externa**, incluindo cavidades internas;
+não avalia defeitos, classificação de peças, economia financeira ou qualidade em
+produção. A entrada sintética tem 256 pixels; ampliar para 512 não cria detalhes.
+
+Leia o [estudo de caso e seus limites](docs/estudo_caso_demo.md), incluindo as
+falhas encontradas e o protocolo para uma futura avaliação com imagens reais.
+O código de processamento original e o relatório histórico foram preservados.
+
 ## Dados e organização
 
 O conjunto *Casting Product Image Data for Quality Inspection*, fornecido para a atividade no arquivo `casting_512x512.zip`, contém 1.300 imagens de 512 × 512 pixels: 781 em `def_front` e 519 em `ok_front`. O código e a documentação podem ser publicados no GitHub; imagens originais, resultados e relatórios ficam fora do repositório pelo `.gitignore`.
