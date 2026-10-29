@@ -1,6 +1,6 @@
 # Estudo de caso: quando a máscara externa exige revisão
 
-**Estado: experimento educacional preparado para revisão, ainda não publicado.**
+**Estado: experimento educacional com resultados documentados; não constitui validação industrial.**
 
 ## Problema e entrega
 
@@ -24,9 +24,11 @@ Este experimento não reproduz o lote de 1.300 imagens e não o substitui.
   internos. A máscara volta a 256 por vizinho mais próximo antes da comparação.
 - Uma execução de aquecimento e cinco medições por cena/configuração. Semente
   2026, uma thread OpenCV, reinicialização do RNG antes de cada execução.
-- Limite de 20 segundos para o conjunto de repetições de cada configuração,
-  incluindo inicialização do processo isolado. Se excedido, registra timeout e
-  deixa métricas e tempos vazios; não inventa uma máscara nem trata falha como zero.
+- O processo principal espera até 20 segundos por uma resposta do processo de cada
+  configuração, após solicitar sua inicialização. A execução inclui um aquecimento
+  e cinco medições. Esse limite não garante duração total de 20 segundos: criação,
+  comunicação e encerramento do processo também podem consumir tempo. Quando a
+  espera expira, registra timeout e deixa métricas e tempos vazios.
   A contagem de timeouts deve acompanhar qualquer comparação de tempos.
 - Tempo medido inclui o processamento e a obtenção das etapas intermediárias;
   exclui leitura/gravação, desenho e métricas. Os métodos têm operações diferentes.
