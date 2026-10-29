@@ -1,0 +1,42 @@
+{
+  "python": "3.12.14",
+  "numpy": "1.26.4",
+  "opencv": "4.10.0",
+  "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+  "seed": 2026,
+  "threads": 1,
+  "repeats": 5,
+  "warmups": 1,
+  "timeout_seconds_per_configuration": 20,
+  "input_kind": "synthetic; not industrial validation",
+  "inputs": {
+    "central": {
+      "input_sha256": "5f058d8a3556d7ce34ed49e39234b8a8d9f5a8ae366a62de815ffef47303df9e",
+      "mask_sha256": "199dc362b4bfbcb90b17ff49c9d0b4cee0188801953f9e4795ebd12db129a7a0"
+    },
+    "baixo_contraste": {
+      "input_sha256": "b6cf64f586797c8f9e1bfee4d1c51b53eec86fa578cc1a4d2676d84eeb81ad2a",
+      "mask_sha256": "199dc362b4bfbcb90b17ff49c9d0b4cee0188801953f9e4795ebd12db129a7a0"
+    },
+    "ruido": {
+      "input_sha256": "6fb75252adc610c90cc018207f0dd5f6bff3c09605c545d124a6b03ccd9b999a",
+      "mask_sha256": "199dc362b4bfbcb90b17ff49c9d0b4cee0188801953f9e4795ebd12db129a7a0"
+    },
+    "deslocada": {
+      "input_sha256": "3c8e003dc5292e09c05be6910092be10bc7eed6bb92e0fbdb2366de603510693",
+      "mask_sha256": "5fab971e993277c56b7aa3f0c76dd6cc116a081649b6b67586378693b6be5f88"
+    },
+    "alongada": {
+      "input_sha256": "fb6f075aa3b53a8da7230f6353b79380fa051306e4e412985f885f43ef30df6e",
+      "mask_sha256": "348dc6709da5358fe26c37b3634385190120a1e58f2e41af9cdc64517bc72e3c"
+    },
+    "sem_objeto": {
+      "input_sha256": "d5039cbfb3fb9a915614802a721cba155442563d36a6bbf73e582e65f5290890",
+      "mask_sha256": "de2f256064a0af797747c2b97505dc0b9f3df0de4f489eac731c23ae9ca9cc31"
+    }
+  },
+  "source_sha256": {
+    "demo_comparativa.py": "26e7d61f084b4212f661974b3c1c975e6c94ad8bc8984a79e16fa0d54adc2fa0",
+    "preprocess.py": "55926d9c85038538a02d1677d9909243e533d3959758f9eb1050f80ee05ce766"
+  }
+}

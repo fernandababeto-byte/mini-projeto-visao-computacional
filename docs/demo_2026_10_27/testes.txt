@@ -1,0 +1,16 @@
+test_empty_reference_reports_false_area_not_object_iou (test_demo.DemoTests.test_empty_reference_reports_false_area_not_object_iou) ... ok
+test_existing_run_is_not_overwritten (test_demo.DemoTests.test_existing_run_is_not_overwritten) ... ok
+test_metrics_on_known_overlap (test_demo.DemoTests.test_metrics_on_known_overlap) ... ok
+test_perfect_mask (test_demo.DemoTests.test_perfect_mask) ... ok
+test_synthetic_inputs_are_repeatable (test_demo.DemoTests.test_synthetic_inputs_are_repeatable) ... ok
+test_extracts_only_expected_classes_and_is_repeatable (test_pipeline.DatasetPreparationTests.test_extracts_only_expected_classes_and_is_repeatable) ... ok
+test_batch_processes_both_classes_and_reports_corruption (test_pipeline.PipelineTests.test_batch_processes_both_classes_and_reports_corruption) ... ok
+test_output_is_standardized_and_preserves_internal_edges (test_pipeline.PipelineTests.test_output_is_standardized_and_preserves_internal_edges) ... ok
+test_rejects_output_inside_input (test_pipeline.PipelineTests.test_rejects_output_inside_input) ... ok
+test_uniform_image_uses_reviewable_fallback (test_pipeline.PipelineTests.test_uniform_image_uses_reviewable_fallback) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.484s
+
+OK
+ERRO /tmp/tmp8mxlpazr/raw/def_front/corrompida.jpeg: Arquivo de imagem ilegível ou corrompido
